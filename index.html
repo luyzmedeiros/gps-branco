@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GPS KM</title>
+    <style>
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Cor do fundo para BRANCO */
+            background-color: white;
+            /* Cor do texto para #535353 */
+            color: #535353;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #km-display {
+            font-size: 100px; 
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            white-space: nowrap; 
+            text-align: center;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="km-display">0 KM</div>
+
+    <script>
+        const display = document.getElementById('km-display');
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) {
+                e.preventDefault();
+            }
+        });
+
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition((position) => {
+                const velocidadeMS = position.coords.speed;
+
+                if (velocidadeMS && velocidadeMS > 0) {
+                    const kmHora = Math.floor(velocidadeMS * 3.6);
+
+                    if (kmHora > 4) {
+                        display.innerText = `${kmHora} KM`;
+                    } else {
+                        display.innerText = "0 KM";
+                    }
+                } else {
+                    display.innerText = "0 KM";
+                }
+            }, null, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            });
+        }
+    </script>
+</body>
+</html>
