@@ -8,7 +8,6 @@
         * {
             -webkit-user-select: none;
             -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
@@ -16,8 +15,7 @@
         body {
             margin: 0;
             padding: 0;
-            /* Transição suave ao mudar as cores */
-            transition: background-color 0.5s, color 0.5s;
+            /* REMOVIDO: transition (para ser instantâneo) */
             display: flex;
             justify-content: center; 
             align-items: center;
@@ -25,6 +23,17 @@
             width: 100vw;
             overflow: hidden;
             touch-action: none;
+        }
+
+        /* Classes de Tema para troca imediata */
+        body.day {
+            background-color: #DCF2FF;
+            color: #535353;
+        }
+
+        body.night {
+            background-color: black;
+            color: white;
         }
 
         #km-display {
@@ -42,51 +51,41 @@
 
     <script>
         const display = document.getElementById('km-display');
+        const bodyEl = document.body;
 
-        // Função para atualizar o tema baseado na hora
         function updateTheme() {
             const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const totalMinutes = (hours * 60) + minutes;
+            const totalMinutes = (now.getHours() * 60) + now.getMinutes();
 
-            // 4:31h = (4 * 60) + 31 = 271 minutos
-            // 18:00h = 18 * 60 = 1080 minutos
+            // Dia: 04:31 (271min) até 17:59 (1079min)
             const isDaytime = totalMinutes >= 271 && totalMinutes < 1080;
 
             if (isDaytime) {
-                // Modo Dia (04:31 até 17:59)
-                document.body.style.backgroundColor = "#DCF2FF";
-                document.body.style.color = "#535353";
+                // Só altera se a classe atual não for 'day'
+                if (bodyEl.className !== 'day') {
+                    bodyEl.className = 'day';
+                }
             } else {
-                // Modo Noite (18:00 até 04:30)
-                document.body.style.backgroundColor = "black";
-                document.body.style.color = "white";
+                // Só altera se a classe atual não for 'night'
+                if (bodyEl.className !== 'night') {
+                    bodyEl.className = 'night';
+                }
             }
         }
 
-        // Executa ao carregar e verifica a cada 1 minuto
+        // Executa na hora que abre o app
         updateTheme();
-        setInterval(updateTheme, 60000);
+        
+        // Verifica a cada 10 segundos para não haver atraso perceptível
+        setInterval(updateTheme, 10000);
 
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) {
-                e.preventDefault();
-            }
-        });
-
+        // GPS
         if ("geolocation" in navigator) {
             navigator.geolocation.watchPosition((position) => {
                 const velocidadeMS = position.coords.speed;
-
                 if (velocidadeMS && velocidadeMS > 0) {
                     const kmHora = Math.floor(velocidadeMS * 3.6);
-
-                    if (kmHora > 4) {
-                        display.innerText = `${kmHora} KM`;
-                    } else {
-                        display.innerText = "0 KM";
-                    }
+                    display.innerText = kmHora > 4 ? `${kmHora} KM` : "0 KM";
                 } else {
                     display.innerText = "0 KM";
                 }
@@ -96,6 +95,11 @@
                 timeout: 5000
             });
         }
+
+        // Bloqueios básicos
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && ['c', 'u', 's'].includes(e.key)) e.preventDefault();
+        });
     </script>
 </body>
 </html>
