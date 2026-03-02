@@ -16,10 +16,8 @@
         body {
             margin: 0;
             padding: 0;
-            /* Cor do fundo para BRANCO */
-            background-color: #DCF2FF;
-            /* Cor do texto para #535353 */
-            color: #535353;
+            /* Transição suave ao mudar as cores */
+            transition: background-color 0.5s, color 0.5s;
             display: flex;
             justify-content: center; 
             align-items: center;
@@ -44,6 +42,32 @@
 
     <script>
         const display = document.getElementById('km-display');
+
+        // Função para atualizar o tema baseado na hora
+        function updateTheme() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const totalMinutes = (hours * 60) + minutes;
+
+            // 4:31h = (4 * 60) + 31 = 271 minutos
+            // 18:00h = 18 * 60 = 1080 minutos
+            const isDaytime = totalMinutes >= 271 && totalMinutes < 1080;
+
+            if (isDaytime) {
+                // Modo Dia (04:31 até 17:59)
+                document.body.style.backgroundColor = "#DCF2FF";
+                document.body.style.color = "#535353";
+            } else {
+                // Modo Noite (18:00 até 04:30)
+                document.body.style.backgroundColor = "black";
+                document.body.style.color = "white";
+            }
+        }
+
+        // Executa ao carregar e verifica a cada 1 minuto
+        updateTheme();
+        setInterval(updateTheme, 60000);
 
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) {
